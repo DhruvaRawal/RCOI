@@ -1,0 +1,335 @@
+/* ==========================================================================
+   RCOI theme: royal Indian court. Maroon, gold, ivory and peacock teal.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  --ink: #14070a;
+  --maroon-950: #1e080c;
+  --maroon-900: #2a0c10;
+  --maroon-800: #3d1118;
+  --maroon-700: #5a1622;
+  --maroon-600: #7a1f2d;
+  --maroon-500: #962a39;
+  --gold-200: #f8e6b4;
+  --gold-300: #f1d48a;
+  --gold-400: #e5bd62;
+  --gold-500: #d2a646;
+  --gold-600: #ac8231;
+  --gold-700: #6f531d;
+  --ivory: #f6ebd0;
+  --ivory-dim: #cdbb94;
+  --ivory-faint: rgba(246, 235, 208, 0.62);
+  --teal-400: #34a6a8;
+  --teal-600: #0f5e63;
+  --teal-800: #0a3437;
+  --ok: #6cc47b;
+  --danger: #ef6a5d;
+  --warn: #f2b33d;
+
+  --font-display: 'Yatra One', 'Georgia', serif;
+  --font-body: 'Eczar', 'Georgia', serif;
+
+  --radius: 12px;
+  --shadow-1: 0 2px 6px rgba(0, 0, 0, 0.45);
+  --shadow-2: 0 10px 30px rgba(0, 0, 0, 0.55);
+  --gold-line: linear-gradient(90deg, transparent, var(--gold-500), var(--gold-300), var(--gold-500), transparent);
+
+  /* Layout tokens (tuned in game.css media queries). */
+  --topbar-h: 44px;
+  --hand-card-w: clamp(52px, min(7.2vw, 15vh), 104px);
+  --pile-card-w: clamp(40px, min(6.6vw, 11.5vh), 112px);
+  --seat-avatar: clamp(40px, min(5.4vw, 9vh), 72px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background-color: var(--maroon-950);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(150, 42, 57, 0.35), transparent 60%),
+    radial-gradient(ellipse at 50% 120%, rgba(15, 94, 99, 0.28), transparent 55%),
+    /* jaali lattice */
+    repeating-linear-gradient(45deg, rgba(210, 166, 70, 0.045) 0 2px, transparent 2px 22px),
+    repeating-linear-gradient(-45deg, rgba(210, 166, 70, 0.045) 0 2px, transparent 2px 22px);
+  color: var(--ivory);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+h1,
+h2,
+h3,
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--gold-300);
+  margin: 0;
+}
+
+button {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold-300);
+  outline-offset: 2px;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  --btn-bg: linear-gradient(180deg, var(--maroon-600), var(--maroon-700));
+  appearance: none;
+  border: 1px solid var(--gold-600);
+  background: var(--btn-bg);
+  color: var(--ivory);
+  padding: 0.5em 1.1em;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: inset 0 1px 0 rgba(255, 230, 170, 0.25), var(--shadow-1);
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease,
+    opacity 0.12s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+}
+.btn:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+.btn--gold {
+  --btn-bg: linear-gradient(180deg, var(--gold-300), var(--gold-500));
+  color: var(--maroon-900);
+  border-color: var(--gold-200);
+}
+.btn--teal {
+  --btn-bg: linear-gradient(180deg, #187a80, var(--teal-600));
+  border-color: var(--teal-400);
+}
+.btn--ghost {
+  --btn-bg: rgba(0, 0, 0, 0.25);
+  border-color: rgba(229, 189, 98, 0.45);
+}
+.btn--danger {
+  --btn-bg: linear-gradient(180deg, #a63a33, #7a231e);
+  border-color: #e98a7f;
+}
+.btn--small {
+  padding: 0.3em 0.8em;
+  font-size: 0.85em;
+}
+.btn--icon {
+  padding: 0;
+  width: 2.2em;
+  height: 2.2em;
+}
+.btn.is-active {
+  box-shadow:
+    0 0 0 2px var(--gold-300),
+    var(--shadow-1);
+}
+
+/* ---------- Inputs ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9em;
+  color: var(--ivory-dim);
+}
+.input {
+  font: inherit;
+  font-size: 1.05rem;
+  color: var(--ivory);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--gold-700);
+  border-radius: 10px;
+  padding: 0.55em 0.8em;
+  outline: none;
+  min-width: 0;
+}
+.input:focus {
+  border-color: var(--gold-400);
+  box-shadow: 0 0 0 3px rgba(229, 189, 98, 0.2);
+}
+.input--code {
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  font-family: var(--font-display);
+}
+
+/* ---------- Panels & ornaments ---------- */
+
+.panel {
+  background:
+    linear-gradient(180deg, rgba(90, 22, 34, 0.92), rgba(42, 12, 16, 0.96)),
+    var(--maroon-900);
+  border: 1px solid var(--gold-600);
+  border-radius: 18px;
+  box-shadow:
+    inset 0 0 0 4px rgba(0, 0, 0, 0.25),
+    inset 0 0 0 5px rgba(229, 189, 98, 0.35),
+    var(--shadow-2);
+  padding: 22px 24px;
+}
+
+.ornament {
+  height: 1px;
+  background: var(--gold-line);
+  border: 0;
+  margin: 12px 0;
+  position: relative;
+  overflow: visible;
+}
+.ornament::after {
+  content: '❖';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -52%);
+  color: var(--gold-400);
+  font-size: 12px;
+  background: var(--maroon-800);
+  padding: 0 8px;
+  line-height: 1;
+}
+
+.muted {
+  color: var(--ivory-faint);
+}
+.small {
+  font-size: 0.85em;
+}
+.error-text {
+  color: var(--danger);
+  font-size: 0.9em;
+  min-height: 1.3em;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Modal ---------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 3, 5, 0.62);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+  padding: 16px;
+}
+.modal {
+  max-width: min(640px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  position: relative;
+}
+.modal--wide {
+  max-width: min(920px, 100%);
+}
+.modal__title {
+  font-size: 1.6rem;
+  text-align: center;
+  margin-bottom: 4px;
+}
+.modal__body {
+  margin-top: 8px;
+}
+.modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.modal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* ---------- Toasts ---------- */
+
+.toasts {
+  position: fixed;
+  top: calc(var(--topbar-h) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 60;
+  pointer-events: none;
+  width: min(520px, calc(100vw - 32px));
+}
+.toast {
+  background: rgba(30, 8, 12, 0.94);
+  border: 1px solid var(--gold-600);
+  border-left: 4px solid var(--gold-400);
+  padding: 8px 14px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-1);
+  font-size: 0.92em;
+}
+.toast--error {
+  border-left-color: var(--danger);
+}
+
+/* ---------- Rotate hint (phones in portrait) ---------- */
+
+.rotate-hint {
+  display: none;
+}
+@media (orientation: portrait) and (max-width: 700px) {
+  .rotate-hint.is-game {
+    display: grid;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    place-items: center;
+    text-align: center;
+    padding: 24px;
+    background: var(--maroon-950);
+  }
+}
