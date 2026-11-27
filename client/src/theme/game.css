@@ -1313,6 +1313,99 @@
   flex: 1;
   font-weight: 600;
 }
+
+/* Host: empty seats become "add a bot" buttons; the plus appears on hover. */
+.lobby__seat--addable {
+  padding: 0;
+}
+.lobby__add {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 10px;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 12px;
+}
+.lobby__seat--addable:hover,
+.lobby__seat--addable:focus-within {
+  opacity: 1;
+  background: rgba(241, 212, 138, 0.08);
+  border-left-color: var(--gold-400);
+}
+.lobby__empty-dot {
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.lobby__plus {
+  opacity: 0;
+  color: var(--gold-300);
+  font-size: 26px;
+  line-height: 1;
+  font-weight: 600;
+  transform: scale(0.6);
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+}
+.lobby__add:hover .lobby__empty-dot,
+.lobby__add:focus-visible .lobby__empty-dot {
+  border-style: solid;
+  border-color: var(--gold-400);
+  background: rgba(241, 212, 138, 0.12);
+}
+.lobby__add:hover .lobby__plus,
+.lobby__add:focus-visible .lobby__plus {
+  opacity: 1;
+  transform: none;
+}
+.lobby__add-hover {
+  display: none;
+  color: var(--gold-200);
+}
+.lobby__add:hover .lobby__add-idle,
+.lobby__add:focus-visible .lobby__add-idle {
+  display: none;
+}
+.lobby__add:hover .lobby__add-hover,
+.lobby__add:focus-visible .lobby__add-hover {
+  display: inline;
+}
+@media (hover: none) {
+  /* Touch screens can't hover: always show the plus. */
+  .lobby__plus {
+    opacity: 0.8;
+    transform: none;
+  }
+}
+.lobby__difficulty {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ivory);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--gold-600);
+  border-radius: 8px;
+  padding: 3px 6px;
+  cursor: pointer;
+}
+.lobby__difficulty option {
+  background: var(--maroon-900);
+}
+.lobby__remove {
+  width: 1.9em;
+  height: 1.9em;
+}
+.badge--bot {
+  border-color: var(--teal-400);
+  color: var(--teal-400);
+}
 .lobby__actions {
   display: flex;
   gap: 8px;

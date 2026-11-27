@@ -1,5 +1,12 @@
 import { type Ack, C2S, type PlayerId, S2C, type SessionInfo } from '@rcoi/shared';
-import { CreateRoomSchema, JoinRoomSchema, PlayerActionSchema, ResumeSchema } from '@rcoi/shared/schemas';
+import {
+  BotDifficultySchema,
+  BotTargetSchema,
+  CreateRoomSchema,
+  JoinRoomSchema,
+  PlayerActionSchema,
+  ResumeSchema,
+} from '@rcoi/shared/schemas';
 import type { Server, Socket } from 'socket.io';
 import type { Room, Seat } from '../rooms/Room';
 import type { RoomManager } from '../rooms/RoomManager';
@@ -90,6 +97,25 @@ export function registerHandlers(io: Server, rooms: RoomManager): void {
     socket.on(C2S.start, hostCommand((room, id) => room.start(id)));
     socket.on(C2S.rematch, hostCommand((room, id) => room.rematch(id)));
     socket.on(C2S.endGame, hostCommand((room, id) => room.endGame(id)));
+
+    // Bots (host only; the room enforces it).
+    socket.on(C2S.addBot, hostCommand((room, id) => room.addBot(id)));
+    socket.on(C2S.removeBot, (payload: unknown, ack: unknown) => {
+      const reply = safeAck(ack);
+      const p = BotTargetSchema.safeParse(payload);
+      if (!bound) return reply({ ok: false, error: 'You are not in a room.' });
+      if (!p.success) return reply({ ok: false, error: 'Invalid request.' });
+      const err = bound.room.removeBot(bound.playerId, p.data.playerId);
+      reply(err ? { ok: false, error: err } : { ok: true });
+    });
+    socket.on(C2S.setBotDifficulty, (payload: unknown, ack: unknown) => {
+      const reply = safeAck(ack);
+      const p = BotDifficultySchema.safeParse(payload);
+      if (!bound) return reply({ ok: false, error: 'You are not in a room.' });
+      if (!p.success) return reply({ ok: false, error: 'Invalid request.' });
+      const err = bound.room.setBotDifficulty(bound.playerId, p.data.playerId, p.data.difficulty);
+      reply(err ? { ok: false, error: err } : { ok: true });
+    });
 
     socket.on(C2S.action, (payload: unknown, ack: unknown) => {
       const reply = safeAck(ack);

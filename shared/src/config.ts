@@ -39,6 +39,9 @@ export interface TimerConfig {
   disconnectedGraceMs: number;
   /** Timer used for players who have been disconnected longer than the grace period. */
   disconnectedTurnMs: number;
+  /** Bots wait a random time in this range before acting, so humans can follow. */
+  botMinMs: number;
+  botMaxMs: number;
 }
 
 export interface GameConfig {
@@ -63,6 +66,8 @@ export const DEFAULT_CONFIG: GameConfig = {
     revealHoldMs: 4_500,
     disconnectedGraceMs: 120_000,
     disconnectedTurnMs: 5_000,
+    botMinMs: 1_100,
+    botMaxMs: 2_400,
   },
   rulings: {
     tieWinner: 'target',

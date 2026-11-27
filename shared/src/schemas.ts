@@ -32,3 +32,6 @@ export type CreateRoomPayload = z.infer<typeof CreateRoomSchema>;
 export type JoinRoomPayload = z.infer<typeof JoinRoomSchema>;
 export type ResumePayload = z.infer<typeof ResumeSchema>;
 
+
+export const BotTargetSchema = z.object({ playerId: id });
+export const BotDifficultySchema = z.object({ playerId: id, difficulty: z.enum(['easy', 'medium', 'hard']) });

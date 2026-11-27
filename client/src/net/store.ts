@@ -1,5 +1,6 @@
 import {
   type BluffType,
+  type BotDifficulty,
   C2S,
   type CardKind,
   type CardType,
@@ -166,6 +167,18 @@ export const commands = {
   },
   async endGame() {
     const res = await request(C2S.endGame);
+    if (!res.ok) toast(res.error, 'error');
+  },
+  async addBot() {
+    const res = await request(C2S.addBot);
+    if (!res.ok) toast(res.error, 'error');
+  },
+  async removeBot(playerId: PlayerId) {
+    const res = await request(C2S.removeBot, { playerId });
+    if (!res.ok) toast(res.error, 'error');
+  },
+  async setBotDifficulty(playerId: PlayerId, difficulty: BotDifficulty) {
+    const res = await request(C2S.setBotDifficulty, { playerId, difficulty });
     if (!res.ok) toast(res.error, 'error');
   },
   async act(action: PlayerAction): Promise<boolean> {

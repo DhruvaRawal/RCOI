@@ -3,7 +3,7 @@ import { type Socket, io as connect } from 'socket.io-client';
 import { type RcoiServer, createRcoiServer } from '../src/app';
 
 export const FAST: DeepPartial<GameConfig> = {
-  timers: { turnMs: 400, followUpMs: 300, revealHoldMs: 30, disconnectedGraceMs: 300, disconnectedTurnMs: 60 },
+  timers: { turnMs: 400, followUpMs: 300, revealHoldMs: 30, disconnectedGraceMs: 300, disconnectedTurnMs: 60, botMinMs: 5, botMaxMs: 20 },
 };
 
 export async function startServer(partial: DeepPartial<GameConfig> = FAST): Promise<{ server: RcoiServer; url: string }> {

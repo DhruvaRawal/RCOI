@@ -273,7 +273,7 @@ export function Table({ room, view }: { room: RoomView; view: PlayerView }) {
           view={view}
           mode={mode}
           onCard={(id) => clickHandCard(view, mode, id, notice)}
-          onAbility={(id) => clickAbility(view, id, notice)}
+          onAbility={(id) => clickAbility(view, mode, id, notice)}
         />
         <ActionButtons view={view} mode={mode} waitingText={waitingText} locked={locked} sending={sending} sendNow={sendNow} />
       </footer>

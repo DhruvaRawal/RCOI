@@ -29,7 +29,7 @@ export class RoomManager {
 
   findByToken(token: string): { room: Room; seat: Seat } | null {
     for (const room of this.rooms.values()) {
-      const seat = room.seats.find((s) => s.token === token);
+      const seat = room.seats.find((s) => !s.bot && s.token === token);
       if (seat) return { room, seat };
     }
     return null;
@@ -37,7 +37,7 @@ export class RoomManager {
 
   findByRejoinCode(code: string, rejoinCode: string): { room: Room; seat: Seat } | null {
     const room = this.get(code);
-    const seat = room?.seats.find((s) => s.rejoinCode === rejoinCode.trim().toUpperCase());
+    const seat = room?.seats.find((s) => !s.bot && s.rejoinCode === rejoinCode.trim().toUpperCase());
     return room && seat ? { room, seat } : null;
   }
 

@@ -59,8 +59,22 @@ Each **browser tab is a separate player**. The seat token is stored per tab in
 Reloading a tab puts you back in your seat. Closing a tab disconnects that player. Their
 turns then time out (drawing a card), and they can come back with their rejoin code (see below).
 
-**Bots.** To fill seats while testing alone, run random-move bots. They connect over
-Socket.IO like a browser, so they only see their own view.
+**Bots in the lobby.** The host can fill empty seats with computer players. Hover an empty
+seat (or tap the "+") to add a bot named `BOT {name}`, then pick **Easy**, **Medium** or
+**Hard** from its dropdown, or remove it with ✕. Bots run on the server and decide only from
+their own player view, so they never see hidden cards:
+- **Easy** plays random legal moves.
+- **Medium** plays honestly when it can, saves Vidushaka for its last card, challenges players
+  who are close to winning and uses its abilities sensibly.
+- **Hard** also counts the cards it can account for, to judge how likely a card is a bluff. It
+  challenges only when it's confident or someone is about to win. Over 400 seeded games it
+  beat Medium about 76% of the time and Easy about 93%.
+
+Strategies are in `shared/src/bots/strategy.ts`. The bot "thinking" delay is
+`timers.botMinMs` / `botMaxMs` in `config.ts`.
+
+**Bot script.** You can also fill seats with random-move bots from the command line. They
+connect over Socket.IO like a browser.
 
 ```powershell
 npm run bots -- --room ABCDE --count 3

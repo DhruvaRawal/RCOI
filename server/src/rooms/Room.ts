@@ -1,5 +1,7 @@
 import {
   AVATAR_COUNT,
+  BOT_NAMES,
+  type BotDifficulty,
   type GameConfig,
   type GameUpdate,
   PLAYER_COLORS,
@@ -10,6 +12,7 @@ import {
   S2C,
   type SessionInfo,
 } from '@rcoi/shared';
+import { BotDriver } from '../game/BotDriver';
 import { GameSession } from '../game/GameSession';
 import { randomCode, randomPlayerId, randomSeed, randomToken, shuffled } from './identity';
 
@@ -22,6 +25,8 @@ export interface Seat {
   avatar: number;
   socketId: string | null;
   disconnectedAt: number | null;
+  /** Computer player (no socket, never disconnects). */
+  bot: BotDifficulty | null;
 }
 
 export interface RoomDeps {
@@ -37,6 +42,7 @@ export class Room {
   seats: Seat[] = [];
   status: RoomStatus = 'lobby';
   session: GameSession | null = null;
+  private bots: BotDriver | null = null;
   endedByHost = false;
   private timers = new Map<string, ReturnType<typeof setTimeout>>();
 
@@ -49,7 +55,7 @@ export class Room {
   // Seats
   // ---------------------------------------------------------------------------
 
-  addSeat(name: string): Seat | string {
+  addSeat(name: string, bot: BotDifficulty | null = null): Seat | string {
     if (this.status === 'playing') return 'This game has already started.';
     if (this.seats.length >= this.deps.config.maxPlayers) return 'This room is full.';
     const clean = name.trim();
@@ -66,11 +72,56 @@ export class Room {
       color: PLAYER_COLORS.find((c) => !usedColors.has(c.hex))!.hex,
       avatar: shuffled(Array.from({ length: AVATAR_COUNT }, (_, i) => i)).find((a) => !usedAvatars.has(a))!,
       socketId: null,
-      disconnectedAt: Date.now(),
+      disconnectedAt: bot ? null : Date.now(),
+      bot,
     };
     this.seats.push(seat);
-    if (!this.hostId) this.hostId = seat.playerId;
+    if (!this.hostId && !bot) this.hostId = seat.playerId;
     return seat;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Bots (host only, before a game starts)
+  // ---------------------------------------------------------------------------
+
+  private botCommand(by: PlayerId): string | null {
+    if (by !== this.hostId) return 'Only the host can manage bots.';
+    if (this.status === 'playing') return 'Bots can only be changed between games.';
+    return null;
+  }
+
+  addBot(by: PlayerId, difficulty: BotDifficulty = 'medium'): string | null {
+    const err = this.botCommand(by);
+    if (err) return err;
+    const taken = new Set(this.seats.map((s) => s.name.toLowerCase()));
+    const free = BOT_NAMES.filter((n) => !taken.has(`bot ${n}`.toLowerCase()));
+    const name = `BOT ${free.length ? free[Math.floor(Math.random() * free.length)] : `${this.seats.length + 1}`}`;
+    const seat = this.addSeat(name, difficulty);
+    if (typeof seat === 'string') return seat;
+    this.broadcastRoom();
+    return null;
+  }
+
+  removeBot(by: PlayerId, playerId: PlayerId): string | null {
+    const err = this.botCommand(by);
+    if (err) return err;
+    if (!this.seat(playerId)?.bot) return 'That seat is not a bot.';
+    this.removeSeat(playerId);
+    return null;
+  }
+
+  setBotDifficulty(by: PlayerId, playerId: PlayerId, difficulty: BotDifficulty): string | null {
+    const err = this.botCommand(by);
+    if (err) return err;
+    const seat = this.seat(playerId);
+    if (!seat?.bot) return 'That seat is not a bot.';
+    seat.bot = difficulty;
+    this.broadcastRoom();
+    return null;
+  }
+
+  private botLevels(): Map<PlayerId, BotDifficulty> {
+    return new Map(this.seats.filter((s) => s.bot).map((s) => [s.playerId, s.bot!]));
   }
 
   seat(playerId: PlayerId): Seat | undefined {
@@ -129,13 +180,14 @@ export class Room {
   private removeSeat(playerId: PlayerId): void {
     this.clearTimer(`seat:${playerId}`);
     this.seats = this.seats.filter((s) => s.playerId !== playerId);
-    if (this.seats.length === 0) return this.dispose();
+    // Bots never keep a room alive on their own.
+    if (!this.seats.some((s) => !s.bot)) return this.dispose();
     if (this.hostId === playerId) this.transferHost();
     this.broadcastRoom();
   }
 
   private transferHost(): void {
-    const next = this.seats.find((s) => s.socketId) ?? this.seats[0];
+    const next = this.seats.find((s) => s.socketId) ?? this.seats.find((s) => !s.bot);
     if (next) this.hostId = next.playerId;
   }
 
@@ -151,6 +203,7 @@ export class Room {
       return `You need ${minPlayers}-${maxPlayers} players to start.`;
     }
     this.session?.stop();
+    this.bots?.stop();
     this.status = 'playing';
     this.endedByHost = false;
     this.broadcastRoom();
@@ -165,11 +218,14 @@ export class Room {
           this.status = 'finished';
           this.broadcastRoom();
         },
+        onCommit: (events) => this.bots?.onCommit(events),
       },
       this.seats.map((s) => s.playerId),
       this.deps.config,
       randomSeed(),
     );
+    this.bots = new BotDriver(this.session, () => this.botLevels(), this.deps.config);
+    this.bots.tick(); // the first player may be a bot
     return null;
   }
 
@@ -182,6 +238,7 @@ export class Room {
     if (by !== this.hostId) return 'Only the host can end the game.';
     if (this.status !== 'playing') return 'No game is running.';
     this.session?.stop();
+    this.bots?.stop();
     this.status = 'finished';
     this.endedByHost = true;
     this.broadcastRoom();
@@ -207,8 +264,9 @@ export class Room {
         name: s.name,
         color: s.color,
         avatar: s.avatar,
-        connected: !!s.socketId,
+        connected: !!s.socketId || !!s.bot,
         isHost: s.playerId === this.hostId,
+        bot: s.bot,
       })),
     };
   }
@@ -226,6 +284,7 @@ export class Room {
     for (const t of this.timers.values()) clearTimeout(t);
     this.timers.clear();
     this.session?.stop();
+    this.bots?.stop();
     for (const s of this.seats) if (s.socketId) this.deps.emit(s.socketId, S2C.kicked, { reason: 'The room was closed.' });
     this.deps.onDispose(this);
   }

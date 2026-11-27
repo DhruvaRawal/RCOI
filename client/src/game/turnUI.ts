@@ -66,20 +66,24 @@ export type Notice = (text: string) => void;
 
 export function clickHandCard(v: PlayerView, mode: Mode, cardId: CardId, notice: Notice): void {
   const legal = v.legal;
-  if (legal.awaiting === 'give') return setMode({ kind: 'give', cardId });
+  // Tapping the selected card again deselects it.
+  if (legal.awaiting === 'give') {
+    return setMode({ kind: 'give', cardId: mode.kind === 'give' && mode.cardId === cardId ? null : cardId });
+  }
   if (legal.awaiting !== 'turn') return;
 
   if (mode.kind === 'challenge') {
     if (!mode.pileId) return notice('First choose the card you want to challenge (a top card with a meeple).');
-    return setMode({ ...mode, cardId });
+    return setMode({ ...mode, cardId: mode.cardId === cardId ? null : cardId });
   }
   if (mode.kind === 'ability') {
     const opt = abilityOption(v, mode.abilityId);
     if (opt?.needs === 'ownBluffCard') {
-      if (opt.cardIds?.includes(cardId)) return setMode({ ...mode, cardId });
+      if (opt.cardIds?.includes(cardId)) return setMode({ ...mode, cardId: mode.cardId === cardId ? null : cardId });
       return notice(opt.reason ?? 'That card cannot open a new pile (its type already has a pile, or it is Vidushaka).');
     }
   }
+  if (mode.kind === 'play' && mode.cardId === cardId) return resetMode();
   const option = legal.play.find((o) => o.cardId === cardId);
   if (!option || option.pileIds.length === 0) return notice(legal.playNotice ?? 'That card cannot be played now.');
   setMode({ kind: 'play', cardId, pileId: null });
@@ -113,11 +117,12 @@ export function clickSeat(v: PlayerView, mode: Mode, playerId: PlayerId, notice:
   setMode({ ...mode, targetPlayer: playerId });
 }
 
-export function clickAbility(v: PlayerView, abilityId: CardId, notice: Notice): void {
+export function clickAbility(v: PlayerView, mode: Mode, abilityId: CardId, notice: Notice): void {
   const opt = abilityOption(v, abilityId);
   if (!opt) return;
   if (v.legal.awaiting !== 'turn') return notice(opt.reason ?? 'Abilities are used on your turn.');
   if (!opt.usable) return notice(opt.reason ?? 'That ability cannot be used now.');
+  if (mode.kind === 'ability' && mode.abilityId === abilityId) return resetMode(); // tap again to cancel
   setMode({ kind: 'ability', abilityId, targetPlayer: null, cardId: null });
 }
 
@@ -278,6 +283,11 @@ export function clickTopCard(v: PlayerView, mode: Mode, pileId: PileId): boolean
   if (v.legal.awaiting !== 'turn') return false;
   if (mode.kind === 'play' && mode.cardId) return false;
   if (!v.legal.challenge.pileIds.includes(pileId)) return false;
+  // Tapping the card already being challenged cancels the challenge.
+  if (mode.kind === 'challenge' && mode.pileId === pileId) {
+    resetMode();
+    return true;
+  }
   setMode({ kind: 'challenge', pileId, cardId: mode.kind === 'challenge' ? mode.cardId : null });
   return true;
 }

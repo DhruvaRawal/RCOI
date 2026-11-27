@@ -11,3 +11,4 @@ export type { PlayerView, PileView, PileCardView, PublicPlayerView, PendingView,
 export { assertInvariants } from './engine/invariants';
 export { ABILITY_REGISTRY } from './engine/abilities/registry';
 export * from './protocol';
+export * from './bots/strategy';

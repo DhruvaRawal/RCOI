@@ -20,6 +20,8 @@ export interface SessionHost {
   /** Milliseconds the player has been disconnected, or 0 if connected. */
   disconnectedFor(playerId: PlayerId): number;
   onGameOver(): void;
+  /** Called after every state change (used to drive bots). */
+  onCommit?(events: GameEvent[]): void;
 }
 
 /**
@@ -93,6 +95,7 @@ export class GameSession {
     if (revealed) this.holdUntil = now + this.config.timers.revealHoldMs;
     this.schedule(Math.max(now, this.holdUntil));
     this.broadcast(events);
+    this.host.onCommit?.(events);
     if (state.winner) {
       this.stop();
       this.host.onGameOver();

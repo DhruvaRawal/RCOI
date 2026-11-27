@@ -68,7 +68,7 @@ function sandbox(kind: string) {
       minPlayers: 2,
       maxPlayers: 5,
       endedByHost: false,
-      seats: ids.map((id, i) => ({ playerId: id, name: names[id], color: PLAYER_COLORS[i].hex, avatar: i * 2, connected: true, isHost: id === 'me' })),
+      seats: ids.map((id, i) => ({ playerId: id, name: names[id], color: PLAYER_COLORS[i].hex, avatar: i * 2, connected: true, isHost: id === 'me', bot: null })),
     },
     view: toPlayerView(state, 'me'),
     timer: { player: 'me', kind: kind === 'reaction' ? 'reaction' : kind === 'give' ? 'give' : 'turn', startsAt: now, deadline: now + 45_000 },

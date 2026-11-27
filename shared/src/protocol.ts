@@ -2,6 +2,7 @@
  * Network protocol shared by server and client.
  * Client -> server payload schemas live in schemas.ts (server only), so zod stays out of the client bundle.
  */
+import type { BotDifficulty } from './bots/strategy';
 import type { PlayerId, VisibleEvent } from './engine/types';
 import type { PlayerView } from './engine/view';
 
@@ -18,6 +19,9 @@ export const C2S = {
   rematch: 'room:rematch',
   endGame: 'room:end',
   action: 'game:action',
+  addBot: 'room:addBot',
+  removeBot: 'room:removeBot',
+  setBotDifficulty: 'room:botDifficulty',
 } as const;
 
 export const S2C = {
@@ -48,6 +52,8 @@ export interface SeatView {
   avatar: number;
   connected: boolean;
   isHost: boolean;
+  /** Set for computer players (server-side bots). */
+  bot: BotDifficulty | null;
 }
 
 export type RoomStatus = 'lobby' | 'playing' | 'finished';
